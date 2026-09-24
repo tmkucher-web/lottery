@@ -1,0 +1,1380 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#32164d">
+<title>Lottery Randomizer FINAL</title>
+
+<style>
+* { box-sizing: border-box; }
+
+body {
+    margin: 0;
+    min-height: 100vh;
+    font-family: Arial, sans-serif;
+    color: white;
+    background:
+        radial-gradient(circle at 50% 0%, #74359a 0%, #32164d 42%, #100719 100%);
+}
+
+.app {
+    width: min(1450px, 96%);
+    margin: auto;
+    padding: 20px 0 40px;
+}
+
+h1 {
+    text-align: center;
+    margin: 0;
+    font-size: clamp(36px, 5vw, 60px);
+}
+
+.subtitle {
+    text-align: center;
+    color: #bbb;
+    margin: 8px 0 20px;
+}
+
+.settings {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: end;
+    gap: 10px;
+    padding: 15px;
+    border-radius: 18px;
+    background: rgba(255,255,255,.07);
+    border: 1px solid rgba(255,255,255,.12);
+}
+
+.field {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.field label {
+    font-size: 11px;
+    color: #aaa;
+    font-weight: bold;
+}
+
+.field input {
+    width: 190px;
+    height: 44px;
+    border: 0;
+    border-radius: 9px;
+    text-align: center;
+    font-size: 18px;
+    font-weight: bold;
+}
+
+.topButton {
+    height: 44px;
+    padding: 0 18px;
+    border: 0;
+    border-radius: 9px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.newGame {
+    background: white;
+    color: #28123b;
+}
+
+.testButton {
+    background: #35d39a;
+    color: #062518;
+}
+
+.main {
+    display: grid;
+    grid-template-columns: minmax(0,1fr) 400px;
+    gap: 18px;
+    margin-top: 18px;
+}
+
+.card {
+    background: rgba(255,255,255,.07);
+    border: 1px solid rgba(255,255,255,.12);
+    border-radius: 24px;
+    box-shadow: 0 20px 70px rgba(0,0,0,.35);
+}
+
+.rouletteCard {
+    padding: 20px;
+}
+
+.roulette {
+    position: relative;
+    width: min(720px,100%);
+    aspect-ratio: 1;
+    margin: auto;
+}
+
+canvas {
+    width: 100%;
+    height: 100%;
+}
+
+.pointer {
+    position: absolute;
+    left: 50%;
+    top: -2px;
+    transform: translateX(-50%);
+    width: 0;
+    height: 0;
+    border-left: 30px solid transparent;
+    border-right: 30px solid transparent;
+    border-top: 68px solid #ff477e;
+    z-index: 10;
+    filter: drop-shadow(0 5px 8px rgba(0,0,0,.5));
+}
+
+.center {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%,-50%);
+    width: 185px;
+    height: 185px;
+    border-radius: 50%;
+    background: radial-gradient(circle,#55296c,#160820);
+    border: 9px solid #ffd84a;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    z-index: 20;
+    box-shadow: 0 0 35px rgba(255,216,74,.35);
+}
+
+.center small {
+    color: #aaa;
+    font-size: 12px;
+}
+
+.center strong {
+    color: #ffd84a;
+    font-size: 40px;
+    margin-top: 5px;
+}
+
+.winnerPulse {
+    animation: winnerPulse .7s ease;
+}
+
+@keyframes winnerPulse {
+    50% {
+        transform: translate(-50%,-50%) scale(1.14);
+    }
+}
+
+.spinButton {
+    display: block;
+    width: min(500px,100%);
+    height: 66px;
+    margin: 15px auto 0;
+    border: 0;
+    border-radius: 15px;
+    background: linear-gradient(135deg,#ffd84a,#ffad2e);
+    color: #301600;
+    font-size: 20px;
+    font-weight: 900;
+    cursor: pointer;
+}
+
+.spinButton:disabled {
+    opacity: .45;
+    cursor: not-allowed;
+}
+
+.status {
+    text-align: center;
+    color: #bbb;
+    min-height: 24px;
+    margin-top: 10px;
+}
+
+.side {
+    padding: 18px;
+}
+
+.side h2 {
+    margin-top: 0;
+}
+
+.counters {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+}
+
+.counter {
+    text-align: center;
+    padding: 12px;
+    border-radius: 10px;
+    background: rgba(255,255,255,.06);
+}
+
+.counter strong {
+    display: block;
+    color: #ffd84a;
+    font-size: 28px;
+}
+
+.counter span {
+    font-size: 10px;
+    color: #aaa;
+}
+
+.tabs {
+    display: flex;
+    margin-top: 15px;
+    border-bottom: 1px solid rgba(255,255,255,.15);
+}
+
+.tab {
+    flex: 1;
+    padding: 11px;
+    background: none;
+    border: 0;
+    color: #999;
+    font-weight: bold;
+    border-bottom: 3px solid transparent;
+    cursor: pointer;
+}
+
+.tab.active {
+    color: #ffd84a;
+    border-color: #ffd84a;
+}
+
+.tabContent {
+    display: none;
+}
+
+.tabContent.active {
+    display: block;
+}
+
+.winnerList {
+    max-height: 300px;
+    overflow-y: auto;
+    margin-top: 10px;
+}
+
+.winner {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px;
+    margin-bottom: 6px;
+    border-radius: 9px;
+    background: rgba(255,255,255,.06);
+}
+
+.place {
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background: #ffd84a;
+    color: #291400;
+    font-weight: bold;
+}
+
+.winnerNumber {
+    font-size: 19px;
+    font-weight: 900;
+}
+
+.info {
+    margin-top: 10px;
+    padding: 11px;
+    border-radius: 10px;
+    background: rgba(255,71,126,.09);
+    color: #bbb;
+    font-size: 13px;
+    line-height: 1.5;
+}
+
+.sectionTitle {
+    margin: 13px 0 7px;
+    color: #999;
+    font-size: 11px;
+    font-weight: bold;
+}
+
+.range {
+    display: flex;
+    justify-content: space-between;
+    padding: 9px;
+    margin-bottom: 6px;
+    border-radius: 8px;
+    background: rgba(255,255,255,.06);
+}
+
+.range b {
+    color: #ff9ab6;
+}
+
+.range span {
+    color: #888;
+    font-size: 11px;
+}
+
+
+.manual {
+    border-top: 1px solid rgba(255,255,255,.12);
+    margin-top: 15px;
+    padding-top: 12px;
+}
+
+.manualRow {
+    display: flex;
+    gap: 5px;
+    margin-bottom: 8px;
+}
+
+.manualRow input {
+    width: 0;
+    flex: 1;
+    height: 38px;
+    border: 0;
+    border-radius: 8px;
+    text-align: center;
+}
+
+.manualRow button {
+    height: 38px;
+    padding: 0 12px;
+    border: 0;
+    border-radius: 8px;
+    background: #ff477e;
+    color: white;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.testBox {
+    display: none;
+    margin-top: 12px;
+    padding: 12px;
+    border-radius: 10px;
+    background: rgba(50,211,152,.08);
+    border: 1px solid rgba(50,211,152,.2);
+    font-size: 13px;
+    line-height: 1.7;
+}
+
+.testTitle {
+    color: #35d39a;
+    font-weight: bold;
+}
+
+.bar {
+    height: 8px;
+    margin: 3px 0 8px;
+    background: rgba(255,255,255,.08);
+    border-radius: 5px;
+    overflow: hidden;
+}
+
+.bar div {
+    height: 100%;
+    background: #35d39a;
+}
+
+.empty {
+    text-align: center;
+    color: #777;
+    padding: 15px;
+}
+
+.copyButton {
+    width: 100%;
+    margin-top: 10px;
+    height: 42px;
+    border: 0;
+    border-radius: 9px;
+    background: #35d39a;
+    color: #062518;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+@media(max-width:900px) {
+    .main {
+        grid-template-columns: 1fr;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<div class="app">
+
+<h1>🎡 ЛОТЕРЕЯ</h1>
+
+<div class="subtitle">
+Чесний випадковий вибір переможців
+</div>
+
+<div class="settings">
+
+    <div class="field">
+        <label>КІЛЬКІСТЬ КВИТКІВ (1–20 000)</label>
+        <input id="ticketCount" type="number" min="1" max="20000" value="15000">
+    </div>
+
+    <div class="field">
+        <label>КІЛЬКІСТЬ ПЕРЕМОЖЦІВ</label>
+        <input id="winnerCount" type="number" min="1" value="5">
+    </div>
+
+    <button class="topButton newGame" id="newGame">
+        🔄 НОВИЙ РОЗІГРАШ
+    </button>
+
+    <button class="topButton testButton" id="runTest">
+        🧪 ПЕРЕВІРИТИ РАНДОМ
+    </button>
+
+</div>
+
+<div class="main">
+
+<section class="card rouletteCard">
+
+    <div class="roulette">
+
+        <canvas id="wheel" width="900" height="900"></canvas>
+
+        <div class="pointer"></div>
+
+        <div class="center" id="winnerDisplay">
+
+            <small>ПЕРЕМОЖЕЦЬ</small>
+
+            <strong id="numberDisplay">—</strong>
+
+        </div>
+
+    </div>
+
+    <button class="spinButton" id="spin">
+        🎯 ВИЗНАЧИТИ ПЕРЕМОЖЦЯ
+    </button>
+
+    <div class="status" id="status">
+        Готово до розіграшу
+    </div>
+
+</section>
+
+<aside class="card side">
+
+<h2>🏆 РОЗІГРАШ</h2>
+
+<div class="counters">
+
+    <div class="counter">
+        <strong id="remaining">0</strong>
+        <span>БЕРУТЬ УЧАСТЬ</span>
+    </div>
+
+</div>
+
+<div class="tabs">
+
+    <button class="tab active" data-tab="winners">
+        🏆 Переможці
+    </button>
+
+</div>
+
+<div id="winners" class="tabContent active">
+
+    <div class="winnerList" id="winnerList">
+
+        <div class="empty">
+            Переможців ще немає
+        </div>
+
+    </div>
+
+    <button class="copyButton" id="copyWinners">
+        📋 СКОПІЮВАТИ ПЕРЕМОЖЦІВ
+    </button>
+
+</div>
+
+
+<div class="testBox" id="testBox"></div>
+
+</div>
+
+</aside>
+
+</div>
+</div>
+
+<script>
+
+/* =====================================================
+   ДАНІ
+===================================================== */
+
+let tickets = [];
+let winners = [];
+
+
+let spinning = false;
+let wheelRotation = 0;
+
+
+/* =====================================================
+   СПРАВЖНІЙ РІВНОМІРНИЙ RANDOM
+===================================================== */
+
+function randomIndex(max) {
+
+    if (max <= 0) {
+        throw new Error("Немає доступних квитків");
+    }
+
+    const buffer = new Uint32Array(1);
+
+    const limit =
+        Math.floor(0x100000000 / max) * max;
+
+    do {
+        crypto.getRandomValues(buffer);
+    } while (buffer[0] >= limit);
+
+    return buffer[0] % max;
+}
+
+
+/* =====================================================
+   СТВОРЕННЯ СПИСКУ
+===================================================== */
+
+function createTickets() {
+
+    const amount =
+        Number(document.getElementById("ticketCount").value);
+
+    if (
+        !Number.isInteger(amount) ||
+        amount < 1 ||
+        amount > 20000
+    ) {
+        alert("Вкажи кількість квитків від 1 до 20 000.");
+        return false;
+    }
+
+    tickets = Array.from(
+        { length: amount },
+        (_, i) => i + 1
+    );
+
+
+    return true;
+}
+
+
+/* =====================================================
+   НОВИЙ РОЗІГРАШ
+===================================================== */
+
+function newGame() {
+
+    if (!createTickets()) return;
+
+    winners = [];
+    spinning = false;
+    wheelRotation = 0;
+
+    document.getElementById("numberDisplay").textContent = "—";
+
+    document.getElementById("status").textContent =
+        "Готово до розіграшу";
+
+    document.getElementById("spin").disabled = false;
+
+    document.getElementById("spin").textContent =
+        "🎯 ВИЗНАЧИТИ ПЕРЕМОЖЦЯ";
+
+    document.getElementById("newGame").disabled = false;
+
+    document.getElementById("testBox").style.display = "none";
+
+    updateInterface();
+
+    drawWheel(0);
+}
+
+
+/* =====================================================
+   ВИБІР ПЕРЕМОЖЦЯ
+
+   ВАЖЛИВО:
+
+   Випадково вибирається ПОЗИЦІЯ у масиві.
+
+   Значення номера не бере участі
+   у розрахунку ймовірності.
+
+   №1 та №19999 мають однаковий шанс.
+===================================================== */
+
+function chooseWinner() {
+
+    if (
+        spinning ||
+        tickets.length === 0
+    ) {
+        return;
+    }
+
+    const totalWinners =
+        Math.max(
+            1,
+            Number(document.getElementById("winnerCount").value) || 1
+        );
+
+    if (winners.length >= totalWinners) return;
+
+    if (totalWinners > tickets.length + winners.length) {
+        alert("Кількість переможців перевищує кількість доступних квитків.");
+        return;
+    }
+
+    /*
+       ВИБІР ДО ПОЧАТКУ АНІМАЦІЇ.
+    */
+
+    const index = randomIndex(tickets.length);
+
+    const winner = tickets[index];
+
+    /*
+       Одразу видаляємо переможця.
+       Повторно він уже не може випасти.
+    */
+
+    tickets.splice(index, 1);
+
+    startWheelAnimation(winner, totalWinners);
+}
+
+
+/* =====================================================
+   ОТРИМАННЯ НОМЕРІВ ДЛЯ ВІЗУАЛЬНОЇ РУЛЕТКИ
+
+   Це ТІЛЬКИ відображення.
+   Сам переможець уже вибраний randomIndex().
+===================================================== */
+
+function getWheelNumbers(winner) {
+
+    const SEGMENTS = 24;
+
+    const result = new Array(SEGMENTS);
+
+    /*
+       Ставимо справжнього переможця
+       в сектор №0.
+
+       Він буде під стрілкою.
+    */
+
+    result[0] = winner;
+
+    const used = new Set([winner]);
+
+    /*
+       Інші сектори заповнюємо реальними
+       доступними номерами.
+    */
+
+    const pool = tickets.slice();
+
+    /*
+       Додаємо вже вилучених переможців,
+       щоб рулетка могла показувати
+       реальні номери, але не використовувала
+       їх повторно як результат.
+    */
+
+    for (const oldWinner of winners) {
+        pool.push(oldWinner);
+    }
+
+    /*
+       Перемішуємо тільки для картинки.
+    */
+
+    for (let i = pool.length - 1; i > 0; i--) {
+        const j = randomIndex(i + 1);
+        [pool[i], pool[j]] = [pool[j], pool[i]];
+    }
+
+    let p = 0;
+
+    for (let i = 1; i < SEGMENTS; i++) {
+
+        while (
+            p < pool.length &&
+            used.has(pool[p])
+        ) {
+            p++;
+        }
+
+        if (p < pool.length) {
+            result[i] = pool[p];
+            used.add(pool[p]);
+            p++;
+        } else {
+            result[i] = "—";
+        }
+    }
+
+    return result;
+}
+
+
+/* =====================================================
+   АНІМАЦІЯ
+
+   ТЕПЕР РУЛЕТКА СПРАВДІ ЗУПИНЯЄТЬСЯ
+   НА СЕКТОРІ ПЕРЕМОЖЦЯ.
+===================================================== */
+
+function startWheelAnimation(winner, totalWinners) {
+
+    spinning = true;
+
+    document.getElementById("spin").disabled = true;
+    document.getElementById("newGame").disabled = true;
+
+    document.getElementById("status").textContent =
+        "🎡 Рулетка обертається...";
+
+    const numbers = getWheelNumbers(winner);
+
+    const SEGMENTS = numbers.length;
+    const step = Math.PI * 2 / SEGMENTS;
+
+    /*
+       Переможець знаходиться в секторі 0.
+
+       Центр сектору 0:
+       -PI/2 + step/2
+
+       Стрілка:
+       -PI/2
+
+       Тому для фіналу сектор потрібно
+       повернути на step/2.
+    */
+
+    const targetOffset = step / 2;
+
+    const startRotation = wheelRotation;
+
+    const currentNormalized =
+        ((startRotation % (Math.PI * 2)) + Math.PI * 2) %
+        (Math.PI * 2);
+
+    let finalRotation =
+        startRotation +
+        Math.PI * 2 * 8;
+
+    /*
+       Підганяємо фінальне положення,
+       щоб центр сектора №0 був під стрілкою.
+    */
+
+    const desired =
+        targetOffset;
+
+    const currentFinal =
+        finalRotation %
+        (Math.PI * 2);
+
+    let correction =
+        desired - currentFinal;
+
+    if (correction < 0) {
+        correction += Math.PI * 2;
+    }
+
+    finalRotation += correction;
+
+    const start = performance.now();
+    const duration = 5000;
+
+    function animate(now) {
+
+        const progress =
+            Math.min(
+                1,
+                (now - start) / duration
+            );
+
+        const eased =
+            1 - Math.pow(1 - progress, 5);
+
+        wheelRotation =
+            startRotation +
+            (finalRotation - startRotation) *
+            eased;
+
+        drawWheel(wheelRotation, numbers);
+
+        if (progress < 1) {
+
+            requestAnimationFrame(animate);
+            return;
+        }
+
+        wheelRotation = finalRotation;
+
+        drawWheel(wheelRotation, numbers);
+
+        document.getElementById("numberDisplay").textContent =
+            winner;
+
+        const display =
+            document.getElementById("winnerDisplay");
+
+        display.classList.remove("winnerPulse");
+
+        void display.offsetWidth;
+
+        display.classList.add("winnerPulse");
+
+        winners.push(winner);
+
+        updateInterface();
+
+        spinning = false;
+
+        document.getElementById("newGame").disabled = false;
+
+        if (
+            winners.length < totalWinners &&
+            tickets.length > 0
+        ) {
+
+            document.getElementById("spin").disabled = false;
+
+            document.getElementById("spin").textContent =
+                "🎯 НАСТУПНИЙ ПЕРЕМОЖЕЦЬ";
+
+            document.getElementById("status").textContent =
+                "Переможець № " +
+                winner +
+                " визначений.";
+
+        } else {
+
+            document.getElementById("spin").disabled = true;
+
+            document.getElementById("spin").textContent =
+                "🏆 РОЗІГРАШ ЗАВЕРШЕНО";
+
+            document.getElementById("status").textContent =
+                "Усі переможці визначені.";
+
+        }
+    }
+
+    requestAnimationFrame(animate);
+}
+
+
+/* =====================================================
+   ОНОВЛЕННЯ ІНТЕРФЕЙСУ
+===================================================== */
+
+function updateInterface() {
+
+    document.getElementById("remaining").textContent =
+        tickets.length;
+
+
+    const winnerList =
+        document.getElementById("winnerList");
+
+    if (!winners.length) {
+
+        winnerList.innerHTML =
+            `<div class="empty">
+                Переможців ще немає
+            </div>`;
+
+    } else {
+
+        winnerList.innerHTML =
+            winners.map((number, index) => `
+                <div class="winner">
+                    <div class="place">${index + 1}</div>
+                    <div class="winnerNumber">№ ${number}</div>
+                </div>
+            `).join("");
+    }
+
+}
+
+
+/* =====================================================
+   ТЕСТ РАНДОМУ
+
+   Тестуємо саме МЕХАНІЗМ ВИБОРУ.
+
+   Кожний квиток має однакову ймовірність.
+
+   Для групи враховується реальна кількість
+   доступних квитків.
+===================================================== */
+
+function runRandomTest() {
+
+    if (!tickets.length) {
+        alert("Немає доступних квитків.");
+        return;
+    }
+
+    const sample = tickets.slice();
+
+    const max =
+        Number(document.getElementById("ticketCount").value);
+
+    const groups = [];
+
+    for (
+        let from = 1;
+        from <= max;
+        from += 1000
+    ) {
+
+        groups.push({
+            from,
+            to: Math.min(from + 999, max),
+            available: 0,
+            count: 0
+        });
+    }
+
+    sample.forEach(number => {
+
+        const index =
+            Math.floor((number - 1) / 1000);
+
+        if (groups[index]) {
+            groups[index].available++;
+        }
+    });
+
+    const TESTS = 100000;
+
+    /*
+       Важливо:
+
+       Кожен тест вибирає ПОЗИЦІЮ
+       у sample.
+
+       Саме так відбувається реальний
+       вибір переможця.
+    */
+
+    for (let i = 0; i < TESTS; i++) {
+
+        const index =
+            randomIndex(sample.length);
+
+        const number = sample[index];
+
+        const groupIndex =
+            Math.floor((number - 1) / 1000);
+
+        if (groups[groupIndex]) {
+            groups[groupIndex].count++;
+        }
+    }
+
+    let html = `
+        <div class="testTitle">
+            🧪 ТЕСТ 100 000 ВИБОРІВ
+        </div>
+
+        <br>
+
+        Перевірено:
+        <b>${sample.length}</b>
+        доступних квитків.
+
+        <br><br>
+    `;
+
+    groups.forEach(group => {
+
+        if (group.available === 0) return;
+
+        const expected =
+            TESTS *
+            group.available /
+            sample.length;
+
+        const actualPercent =
+            group.count / TESTS * 100;
+
+        const expectedPercent =
+            expected / TESTS * 100;
+
+        const deviation =
+            ((group.count - expected) / expected) * 100;
+
+        html += `
+            <div>
+                <b>
+                    ${group.from} – ${group.to}
+                </b>
+
+                — доступно:
+                ${group.available}
+
+                <br>
+
+                Результат:
+                <b>${group.count}</b>
+                (${actualPercent.toFixed(2)}%)
+
+                <br>
+
+                Очікувано:
+                ${expected.toFixed(0)}
+                (${expectedPercent.toFixed(2)}%)
+
+                <br>
+
+                Відхилення:
+                ${deviation >= 0 ? "+" : ""}
+                ${deviation.toFixed(2)}%
+
+            </div>
+
+            <div class="bar">
+                <div style="
+                    width:${Math.min(100, actualPercent * 5)}%;
+                "></div>
+            </div>
+        `;
+    });
+
+    html += `
+        <br>
+        <span style="color:#aaa">
+            Тест не змінює список квитків
+            і не визначає реальних переможців.
+            Він лише перевіряє рівномірність алгоритму.
+        </span>
+    `;
+
+    const box =
+        document.getElementById("testBox");
+
+    box.style.display = "block";
+    box.innerHTML = html;
+}
+
+
+/* =====================================================
+   РУЛЕТКА
+
+   24 реальних номери показуються на секторах.
+
+   Сектор №0 завжди містить переможця.
+   Під час обертання він фізично приходить
+   під верхню стрілку.
+===================================================== */
+
+function drawWheel(rotation = 0, numbers = null) {
+
+    const canvas =
+        document.getElementById("wheel");
+
+    const ctx =
+        canvas.getContext("2d");
+
+    const size = canvas.width;
+    const center = size / 2;
+    const radius = size * .43;
+
+    const segments = 24;
+    const step = Math.PI * 2 / segments;
+
+    if (!numbers) {
+
+        numbers = [];
+
+        for (let i = 0; i < segments; i++) {
+
+            if (tickets.length) {
+                numbers.push(
+                    tickets[i % tickets.length]
+                );
+            } else {
+                numbers.push("—");
+            }
+        }
+    }
+
+    ctx.clearRect(0, 0, size, size);
+
+    /*
+       Зовнішнє коло
+    */
+
+    ctx.save();
+
+    ctx.beginPath();
+
+    ctx.arc(
+        center,
+        center,
+        radius + 18,
+        0,
+        Math.PI * 2
+    );
+
+    ctx.fillStyle = "#180923";
+    ctx.shadowBlur = 30;
+    ctx.shadowColor = "#ffd84a55";
+    ctx.fill();
+
+    ctx.restore();
+
+    /*
+       Сектори
+    */
+
+    ctx.save();
+
+    ctx.translate(center, center);
+    ctx.rotate(rotation);
+
+    for (let i = 0; i < segments; i++) {
+
+        const start = i * step;
+        const end = start + step;
+
+        ctx.beginPath();
+
+        ctx.moveTo(0, 0);
+
+        ctx.arc(
+            0,
+            0,
+            radius,
+            start,
+            end
+        );
+
+        ctx.closePath();
+
+        ctx.fillStyle =
+            i % 2 === 0
+            ? "#7145e8"
+            : "#e94a7d";
+
+        ctx.fill();
+
+        ctx.strokeStyle =
+            "rgba(255,255,255,.22)";
+
+        ctx.lineWidth = 3;
+        ctx.stroke();
+
+        /*
+           НОМЕР КВИТКА
+        */
+
+        const angle =
+            start + step / 2;
+
+        const textRadius =
+            radius * .76;
+
+        const x =
+            Math.cos(angle) * textRadius;
+
+        const y =
+            Math.sin(angle) * textRadius;
+
+        ctx.save();
+
+        ctx.translate(x, y);
+
+        /*
+           Повертаємо текст так,
+           щоб його було легше читати.
+        */
+
+        let textAngle = angle + Math.PI / 2;
+
+        if (
+            textAngle > Math.PI / 2 &&
+            textAngle < Math.PI * 1.5
+        ) {
+            textAngle += Math.PI;
+        }
+
+        ctx.rotate(textAngle);
+
+        ctx.fillStyle = "#ffffff";
+
+        ctx.font =
+            "900 27px Arial";
+
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+
+        ctx.shadowColor =
+            "rgba(0,0,0,.65)";
+
+        ctx.shadowBlur = 5;
+
+        ctx.fillText(
+            "№ " + numbers[i],
+            0,
+            0
+        );
+
+        ctx.restore();
+    }
+
+    /*
+       Зовнішня рамка
+    */
+
+    ctx.beginPath();
+
+    ctx.arc(
+        0,
+        0,
+        radius,
+        0,
+        Math.PI * 2
+    );
+
+    ctx.strokeStyle = "#ffd84a";
+    ctx.lineWidth = 12;
+    ctx.stroke();
+
+    ctx.restore();
+}
+
+
+/* =====================================================
+   КОПІЮВАННЯ ПЕРЕМОЖЦІВ
+===================================================== */
+
+function copyWinners() {
+
+    if (!winners.length) {
+        alert("Переможців ще немає.");
+        return;
+    }
+
+    const text =
+        "🏆 ПЕРЕМОЖЦІ\n\n" +
+        winners
+        .map(
+            (number, index) =>
+                `${index + 1}. № ${number}`
+        )
+        .join("\n");
+
+    navigator.clipboard.writeText(text)
+        .then(() => {
+            alert("Список переможців скопійовано!");
+        })
+        .catch(() => {
+            alert(text);
+        });
+}
+
+
+/* =====================================================
+   ВКЛАДКИ
+===================================================== */
+
+document
+.querySelectorAll(".tab")
+.forEach(tab => {
+
+    tab.addEventListener("click", () => {
+
+        document
+        .querySelectorAll(".tab")
+        .forEach(item =>
+            item.classList.remove("active")
+        );
+
+        document
+        .querySelectorAll(".tabContent")
+        .forEach(item =>
+            item.classList.remove("active")
+        );
+
+        tab.classList.add("active");
+
+        document
+        .getElementById(tab.dataset.tab)
+        .classList.add("active");
+    });
+});
+
+
+/* =====================================================
+   КНОПКИ
+===================================================== */
+
+document
+.getElementById("newGame")
+.addEventListener("click", newGame);
+
+document
+.getElementById("spin")
+.addEventListener("click", chooseWinner);
+
+
+document
+.getElementById("runTest")
+.addEventListener("click", runRandomTest);
+
+document
+.getElementById("copyWinners")
+.addEventListener("click", copyWinners);
+
+
+/* =====================================================
+   ЗАПУСК
+===================================================== */
+
+newGame();
+
+</script>
+
+</body>
+</html>
